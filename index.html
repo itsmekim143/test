@@ -3,149 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT Video Profile</title>
+    <title>Profile Hub</title>
     <style>
         :root {
-            --glow-color: #00e5ff; /* Neon Blue Glow */
+            --accent: #ffffff;
+            --glow: rgba(255, 255, 255, 0.5);
         }
 
         body, html {
             margin: 0;
             padding: 0;
+            width: 100%;
             height: 100%;
-            font-family: 'Inter', sans-serif;
             background-color: #000;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: white;
             overflow: hidden;
         }
 
-        /* Video Background Container */
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -2;
-            pointer-events: none; /* Prevents interaction with the YT player */
-        }
-
-        /* Make the iframe cover the screen and stay centered */
-        #yt-player {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 100vh;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
-        }
-
-        /* Dark Overlay/Mask */
-        .overlay {
+        /* Entry Overlay */
+        #entry-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Adjust for darkness */
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            cursor: pointer;
+            transition: opacity 1s ease;
+        }
+
+        #entry-overlay p {
+            letter-spacing: 5px;
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* YouTube Container */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        #player {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            min-height: 100vh;
+            min-width: 177.77vh;
+            transform: translate(-50%, -50%);
+        }
+
+        .overlay-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
             z-index: -1;
         }
 
-        /* Content Container */
-        .container {
+        /* Main UI */
+        .main-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            text-align: center;
+            opacity: 0;
+            transition: opacity 2s ease;
         }
 
         .profile-card {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 50px;
-            border-radius: 30px;
-            backdrop-filter: blur(15px);
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
-        }
-
-        .avatar {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 2px solid var(--glow-color);
-            box-shadow: 0 0 20px var(--glow-color);
-            margin-bottom: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             margin: 10px 0;
-            letter-spacing: 4px;
-            text-shadow: 0 0 10px var(--glow-color);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px var(--glow);
         }
 
-        .socials {
+        .social-links {
+            margin-top: 25px;
             display: flex;
             gap: 20px;
-            margin-top: 25px;
-            justify-content: center;
         }
 
-        .socials a {
+        .social-links a {
+            color: white;
             text-decoration: none;
-            color: white;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            transition: 0.4s;
-            padding: 8px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 5px;
+            transition: 0.3s;
         }
 
-        .socials a:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--glow-color);
-            box-shadow: 0 0 10px var(--glow-color);
-        }
-
-        #audio-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: 1px solid var(--glow-color);
-            border-radius: 50px;
-            cursor: pointer;
-            z-index: 100;
+        .social-links a:hover {
+            background: white;
+            color: black;
+            box-shadow: 0 0 15px white;
         }
     </style>
 </head>
 <body>
 
-    <button id="audio-btn" onclick="toggleAudio()">UNMUTE VIDEO 🔊</button>
+    <div id="entry-overlay" onclick="enterSite()">
+        <p>[ CLICK TO ENTER ]</p>
+    </div>
 
     <div class="video-background">
-        <div id="yt-player"></div>
+        <div id="player"></div>
     </div>
     
-    <div class="overlay"></div>
+    <div class="overlay-mask"></div>
 
-    <div class="container">
+    <div class="main-content" id="main-ui">
         <div class="profile-card">
-            <img src="https://via.placeholder.com/110" alt="Avatar" class="avatar">
-            <h1>USER NAME</h1>
-            <p style="color: #bbb; letter-spacing: 2px;">VIBING • CODING</p>
-            
-            <div class="socials">
+            <h1>YOUR NAME</h1>
+            <p style="color: #ccc; letter-spacing: 2px;">Developer & Designer</p>
+            <div class="social-links">
                 <a href="#">DISCORD</a>
-                <a href="#">STEAM</a>
+                <a href="#">GITHUB</a>
                 <a href="#">INSTA</a>
             </div>
         </div>
@@ -154,46 +160,42 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         let player;
-        const videoID = '34Pl2DTuwoQ'; // <--- REPLACE THIS WITH YOUR YOUTUBE VIDEO ID
+        const vID = '34Pl2DTuwoQ'; // Your specific video ID
 
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('yt-player', {
-                videoId: videoID,
+            player = new YT.Player('player', {
+                videoId: vID,
                 playerVars: {
                     'autoplay': 1,
                     'controls': 0,
                     'loop': 1,
-                    'playlist': videoID, // Required for looping
+                    'playlist': vID,
                     'modestbranding': 1,
-                    'showinfo': 0,
-                    'mute': 1, // Must start muted for autoplay
-                    'playsinline': 1
+                    'mute': 1,
+                    'rel': 0,
+                    'showinfo': 0
                 },
                 events: {
-                    'onReady': onPlayerReady
+                    'onReady': (e) => e.target.playVideo()
                 }
             });
         }
 
-        function onPlayerReady(event) {
-            event.target.playVideo();
-        }
+        function enterSite() {
+            // Remove overlay
+            const overlay = document.getElementById('entry-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 1000);
 
-        function toggleAudio() {
-            const btn = document.getElementById('audio-btn');
-            if (player.isMuted()) {
+            // Show content
+            document.getElementById('main-ui').style.opacity = '1';
+
+            // Unmute and play
+            if (player) {
                 player.unMute();
-                btn.innerText = "MUTE VIDEO 🔇";
-            } else {
-                player.mute();
-                btn.innerText = "UNMUTE VIDEO 🔊";
+                player.playVideo();
             }
         }
-
-        // Handle window resizing for the video
-        window.addEventListener('resize', () => {
-            // Video centering logic can be expanded here if needed
-        });
     </script>
 </body>
 </html>
