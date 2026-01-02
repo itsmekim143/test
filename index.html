@@ -5,18 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Hub</title>
     <style>
-        :root {
-            --accent: #ffffff;
-            --glow: rgba(255, 255, 255, 0.5);
-        }
-
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             background-color: #000;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             color: white;
             overflow: hidden;
         }
@@ -34,21 +29,10 @@
             justify-content: center;
             z-index: 999;
             cursor: pointer;
-            transition: opacity 1s ease;
+            transition: opacity 0.8s ease;
         }
 
-        #entry-overlay p {
-            letter-spacing: 5px;
-            font-size: 1.2rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        /* YouTube Container */
+        /* Video Background Container */
         .video-background {
             position: fixed;
             top: 0;
@@ -56,18 +40,25 @@
             width: 100%;
             height: 100%;
             z-index: -2;
-            pointer-events: none;
+            overflow: hidden;
         }
 
+        /* This ensures the video fills the screen without black bars */
         #player {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw; /* 16:9 ratio */
-            min-height: 100vh;
-            min-width: 177.77vh;
+            height: 100vh;
             transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        @media (min-aspect-ratio: 16/9) {
+            #player { height: 56.25vw; }
+        }
+        @media (max-aspect-ratio: 16/9) {
+            #player { width: 177.78vh; }
         }
 
         .overlay-mask {
@@ -77,11 +68,9 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(2px);
             z-index: -1;
         }
 
-        /* Main UI */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -89,47 +78,16 @@
             justify-content: center;
             height: 100vh;
             opacity: 0;
-            transition: opacity 2s ease;
+            transition: opacity 1.5s ease;
         }
 
-        .profile-card {
-            text-align: center;
+        .card {
+            background: rgba(0, 0, 0, 0.6);
             padding: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             backdrop-filter: blur(10px);
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin: 10px 0;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            text-shadow: 0 0 15px var(--glow);
-        }
-
-        .social-links {
-            margin-top: 25px;
-            display: flex;
-            gap: 20px;
-        }
-
-        .social-links a {
-            color: white;
-            text-decoration: none;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 8px 20px;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-
-        .social-links a:hover {
-            background: white;
-            color: black;
-            box-shadow: 0 0 15px white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
         }
     </style>
 </head>
@@ -146,21 +104,16 @@
     <div class="overlay-mask"></div>
 
     <div class="main-content" id="main-ui">
-        <div class="profile-card">
+        <div class="card">
             <h1>YOUR NAME</h1>
-            <p style="color: #ccc; letter-spacing: 2px;">Developer & Designer</p>
-            <div class="social-links">
-                <a href="#">DISCORD</a>
-                <a href="#">GITHUB</a>
-                <a href="#">INSTA</a>
-            </div>
+            <p>Developer & Designer</p>
         </div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         let player;
-        const vID = '34Pl2DTuwoQ'; // Your specific video ID
+        const vID = '34Pl2DTuwoQ';
 
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
@@ -170,30 +123,35 @@
                     'controls': 0,
                     'loop': 1,
                     'playlist': vID,
-                    'modestbranding': 1,
                     'mute': 1,
+                    'playsinline': 1,
                     'rel': 0,
-                    'showinfo': 0
+                    'modestbranding': 1
                 },
                 events: {
-                    'onReady': (e) => e.target.playVideo()
+                    'onReady': (e) => {
+                        e.target.playVideo();
+                    },
+                    'onStateChange': (e) => {
+                        // Ensures it stays playing if it tries to buffer/pause
+                        if (e.data === YT.PlayerState.UNSTARTED) {
+                            e.target.playVideo();
+                        }
+                    }
                 }
             });
         }
 
         function enterSite() {
-            // Remove overlay
             const overlay = document.getElementById('entry-overlay');
             overlay.style.opacity = '0';
-            setTimeout(() => overlay.style.display = 'none', 1000);
+            setTimeout(() => overlay.style.display = 'none', 800);
 
-            // Show content
             document.getElementById('main-ui').style.opacity = '1';
 
-            // Unmute and play
             if (player) {
                 player.unMute();
-                player.playVideo();
+                player.playVideo(); // Force play again on interaction
             }
         }
     </script>
