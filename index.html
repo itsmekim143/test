@@ -3,15 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Hub</title>
+    <title>Phonk Sync Profile</title>
     <style>
+        :root {
+            --glow-color: #ff0055; /* Phonk Pink/Red Glow */
+            /* Adjusted for ~105 BPM (0.57s per beat) */
+            --beat-speed: 1.14s; 
+        }
+
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
             background-color: #000;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             color: white;
             overflow: hidden;
         }
@@ -19,58 +23,34 @@
         /* Entry Overlay */
         #entry-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: #000;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 999;
             cursor: pointer;
-            transition: opacity 0.8s ease;
         }
 
-        /* Video Background Container */
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            overflow: hidden;
+        #entry-overlay h2 {
+            letter-spacing: 10px;
+            animation: pulse 1.5s infinite;
         }
 
-        /* This ensures the video fills the screen without black bars */
-        #player {
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Audio Engine (Hidden) */
+        .audio-container {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 100vh;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
+            top: -1000px;
+            visibility: hidden;
         }
 
-        @media (min-aspect-ratio: 16/9) {
-            #player { height: 56.25vw; }
-        }
-        @media (max-aspect-ratio: 16/9) {
-            #player { width: 177.78vh; }
-        }
-
-        .overlay-mask {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: -1;
-        }
-
+        /* Visual Content */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -78,81 +58,106 @@
             justify-content: center;
             height: 100vh;
             opacity: 0;
-            transition: opacity 1.5s ease;
+            transition: opacity 1s ease;
+            background: radial-gradient(circle, rgba(255,0,85,0.05) 0%, rgba(0,0,0,1) 70%);
         }
 
-        .card {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+        /* Beat Sync Card */
+        .profile-card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 60px;
+            border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             text-align: center;
+            backdrop-filter: blur(10px);
+            animation: card-beat var(--beat-speed) infinite ease-in-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 12px;
+            animation: text-glow var(--beat-speed) infinite;
+        }
+
+        /* Sync Animations */
+        @keyframes card-beat {
+            0%, 100% { transform: scale(1); border-color: rgba(255,255,255,0.1); }
+            50% { transform: scale(1.08); border-color: var(--glow-color); box-shadow: 0 0 50px rgba(255,0,85,0.3); }
+        }
+
+        @keyframes text-glow {
+            0%, 100% { text-shadow: 0 0 10px rgba(255,255,255,0.2); color: #fff; }
+            50% { text-shadow: 0 0 30px var(--glow-color), 0 0 60px var(--glow-color); color: var(--glow-color); }
+        }
+
+        /* Particle Stars */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: star-pulse var(--beat-speed) infinite;
+        }
+
+        @keyframes star-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.2; }
+            50% { transform: scale(2.5); opacity: 0.8; }
         }
     </style>
 </head>
 <body>
 
-    <div id="entry-overlay" onclick="enterSite()">
-        <p>[ CLICK TO ENTER ]</p>
+    <div id="entry-overlay" onclick="startApp()">
+        <h2>[ ENTER ]</h2>
+        <p style="font-size: 10px; color: #444; margin-top: 20px;">SYNCING TO: NO BATIDÃO</p>
     </div>
 
-    <div class="video-background">
-        <div id="player"></div>
+    <div class="audio-container">
+        <div id="yt-player"></div>
     </div>
-    
-    <div class="overlay-mask"></div>
 
-    <div class="main-content" id="main-ui">
-        <div class="card">
+    <div class="main-content" id="ui">
+        <div class="profile-card">
             <h1>YOUR NAME</h1>
-            <p>Developer & Designer</p>
+            <p style="color: #666; letter-spacing: 4px; margin-top: 15px;">DEVELOPER • PHONK SYNC</p>
         </div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
         let player;
-        const vID = '34Pl2DTuwoQ';
+        const songID = 'Bf2ml3oE2JA';
 
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                videoId: vID,
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'loop': 1,
-                    'playlist': vID,
-                    'mute': 1,
-                    'playsinline': 1,
-                    'rel': 0,
-                    'modestbranding': 1
-                },
-                events: {
-                    'onReady': (e) => {
-                        e.target.playVideo();
-                    },
-                    'onStateChange': (e) => {
-                        // Ensures it stays playing if it tries to buffer/pause
-                        if (e.data === YT.PlayerState.UNSTARTED) {
-                            e.target.playVideo();
-                        }
-                    }
-                }
+            player = new YT.Player('yt-player', {
+                videoId: songID,
+                playerVars: { 'autoplay': 1, 'loop': 1, 'playlist': songID, 'mute': 1 }
             });
         }
 
-        function enterSite() {
-            const overlay = document.getElementById('entry-overlay');
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.style.display = 'none', 800);
-
-            document.getElementById('main-ui').style.opacity = '1';
+        function startApp() {
+            document.getElementById('entry-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('entry-overlay').style.display = 'none', 1000);
+            document.getElementById('ui').style.opacity = '1';
 
             if (player) {
                 player.unMute();
-                player.playVideo(); // Force play again on interaction
+                player.playVideo();
             }
+        }
+
+        // Generate background stars
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.animationDelay = (Math.random() * 1) + 's';
+            document.body.appendChild(star);
         }
     </script>
 </body>
