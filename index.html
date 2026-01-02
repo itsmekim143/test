@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Hub</title>
+    <title>Video Profile Hub</title>
     <style>
         :root {
             --glow-color: #ffd700;
@@ -19,34 +19,48 @@
             overflow: hidden;
         }
 
-        /* Background Image with Dark Overlay */
-        .background {
+        /* Video Background Container */
+        .video-wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                        url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop'); 
-            background-size: cover;
-            background-position: center;
             z-index: -1;
+            overflow: hidden;
         }
 
-        /* Audio Controls */
+        .video-wrapper video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            filter: brightness(40%); /* Darkens video for readability */
+        }
+
+        /* Music Controls */
         #music-control {
             position: fixed;
             top: 20px;
-            left: 20px;
+            right: 20px;
             z-index: 100;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
             cursor: pointer;
-            backdrop-filter: blur(5px);
-            font-size: 14px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+
+        #music-control:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .container {
@@ -58,139 +72,100 @@
             text-align: center;
         }
 
-        /* Profile Card Styling */
         .profile-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.4);
             padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 1.5s ease-in;
         }
 
-        .avatar-container {
-            position: relative;
-            margin-bottom: 20px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .avatar {
-            width: 100px;
-            height: 100px;
+            width: 110px;
+            height: 110px;
             border-radius: 50%;
             border: 2px solid var(--glow-color);
-            box-shadow: 0 0 15px var(--glow-color);
+            box-shadow: 0 0 20px var(--glow-color);
+            margin-bottom: 15px;
         }
 
         h1 {
-            font-size: 1.8rem;
-            margin: 5px 0;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-size: 2rem;
+            margin: 10px 0;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
-        .description {
-            color: #aaa;
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-        }
-
-        /* Social Icons */
         .socials {
             display: flex;
-            gap: 15px;
+            gap: 20px;
+            margin-top: 20px;
             justify-content: center;
         }
 
         .socials a {
             text-decoration: none;
             color: white;
-            font-size: 1.2rem;
-            opacity: 0.7;
+            font-size: 1.1rem;
+            opacity: 0.6;
             transition: 0.3s;
         }
 
         .socials a:hover {
             opacity: 1;
-            transform: scale(1.2);
-            text-shadow: 0 0 10px white;
-        }
-
-        /* Sparkle/Firefly effect */
-        .particle {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0.6;
-            animation: move linear infinite;
-        }
-
-        @keyframes move {
-            from { transform: translateY(0); }
-            to { transform: translateY(-100vh); }
+            color: var(--glow-color);
         }
     </style>
 </head>
 <body>
 
-    <button id="music-control" onclick="playMusic()">Click to Play Music ♫</button>
+    <button id="music-control" onclick="toggleMusic()">ENABLE AUDIO 🔊</button>
+    
     <audio id="bg-music" loop>
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="background"></div>
+    <div class="video-wrapper">
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-over-a-mountain-landscape-4266-large.mp4" type="video/mp4">
+        </video>
+    </div>
 
     <div class="container">
         <div class="profile-card">
-            <div class="avatar-container">
-                <img src="https://via.placeholder.com/100" alt="Avatar" class="avatar">
-            </div>
-            
+            <img src="https://via.placeholder.com/110" alt="Profile" class="avatar">
             <h1>YOUR NAME</h1>
-            <p class="description">Developer • Designer • Gamer</p>
-
+            <p style="color: #ddd;">Creative Developer</p>
+            
             <div class="socials">
-                <a href="#">Discord</a>
-                <a href="#">Steam</a>
-                <a href="#">Insta</a>
-                <a href="#">Spotify</a>
+                <a href="#">DISCORD</a>
+                <a href="#">GITHUB</a>
+                <a href="#">SPOTIFY</a>
             </div>
         </div>
     </div>
 
     <script>
-        // Music Player Function
         const music = document.getElementById("bg-music");
         const btn = document.getElementById("music-control");
 
-        function playMusic() {
-            music.play();
-            btn.style.display = "none"; // Hides button after starting
+        function toggleMusic() {
+            if (music.paused) {
+                music.play();
+                btn.innerText = "MUSIC ON 🎵";
+                btn.style.borderColor = "var(--glow-color)";
+            } else {
+                music.pause();
+                btn.innerText = "MUSIC OFF 🔇";
+                btn.style.borderColor = "rgba(255, 255, 255, 0.3)";
+            }
         }
-
-        // Particle System
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            const size = Math.random() * 3 + 'px';
-            particle.style.width = size;
-            particle.style.height = size;
-            
-            particle.style.left = Math.random() * 100 + 'vw';
-            particle.style.top = '100vh';
-            
-            const duration = Math.random() * 5 + 5 + 's';
-            particle.style.animationDuration = duration;
-            
-            document.body.appendChild(particle);
-            
-            setTimeout(() => {
-                particle.remove();
-            }, 10000);
-        }
-
-        setInterval(createParticle, 300);
     </script>
 </body>
 </html>
